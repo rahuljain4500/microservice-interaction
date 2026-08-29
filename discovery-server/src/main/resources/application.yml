@@ -1,0 +1,15 @@
+server:
+  port: 8761
+
+spring:
+  application:
+    name: discovery-server
+
+eureka:
+  client:
+    # A registry does not register with or fetch from itself.
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    # Serve the registry immediately on startup (dev convenience).
+    wait-time-in-ms-when-sync-empty: 0
