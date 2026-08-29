@@ -22,3 +22,7 @@ eureka:
   client:
     service-url:
       defaultZone: ${DISCOVERY_SERVER_URL:http://localhost:8761}/eureka
+  instance:
+    prefer-ip-address: false
+    hostname: ${SERVICE_HOSTNAME:localhost}
+    nonSecurePort: ${SERVICE_ADVERTISE_PORT:8080}
