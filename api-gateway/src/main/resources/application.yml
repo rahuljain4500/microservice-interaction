@@ -8,15 +8,30 @@ spring:
     gateway:
       routes:
         # /app1/** -> resolved to a live APP1 instance via Eureka + LoadBalancer
+        #
+        # Spring Cloud Gateway's own Path predicate matches the raw, full incoming request path -- it does
+        # NOT respect spring.webflux.base-path (that only affects normal annotated-controller dispatch,
+        # e.g. RootController's bare "/"). On AWS the container receives the ALB's unstripped
+        # "/api-gateway/app1/..." path, so the predicate must include that same prefix or it never matches
+        # and every gateway-routed call 404s even though the gateway's own root health check passes.
+        # ${SPRING_WEBFLUX_BASE_PATH:} is the exact env var DeployMate injects for this service; it
+        # defaults to empty locally, so this is a no-op there (still matches plain "/app1/**"). The
+        # RewritePath filter then strips that same prefix back off before forwarding, since APP1 itself
+        # only expects "/app1/**" (its own SERVER_SERVLET_CONTEXT_PATH), not the gateway's base path.
         - id: app1-route
           uri: lb://APP1
           predicates:
-            - Path=/app1/**
-        # /app2/** -> resolved to a live APP2 instance via Eureka + LoadBalancer
+            - Path=${SPRING_WEBFLUX_BASE_PATH:}/app1/**
+          filters:
+            - RewritePath=${SPRING_WEBFLUX_BASE_PATH:}/app1/(?<segment>.*), /app1/$\{segment}
+        # /app2/** -> resolved to a live APP2 instance via Eureka + LoadBalancer (see app1-route above for
+        # why the predicate/filter are parametrized this way).
         - id: app2-route
           uri: lb://APP2
           predicates:
-            - Path=/app2/**
+            - Path=${SPRING_WEBFLUX_BASE_PATH:}/app2/**
+          filters:
+            - RewritePath=${SPRING_WEBFLUX_BASE_PATH:}/app2/(?<segment>.*), /app2/$\{segment}
 
 eureka:
   client:
