@@ -1,5 +1,13 @@
 server:
   port: 8081
+  servlet:
+    # Defaults to /app1 locally too (not just DeployMate's injected SERVER_SERVLET_CONTEXT_PATH env
+    # var), matching App1Controller's own bare @GetMapping("/aggregate")/("/standalone") mappings --
+    # keeps this the ONE place that supplies the /app1 prefix in both environments, instead of
+    # stacking a controller-level prefix on top of DeployMate's env var (that double-prefixing was
+    # the AWS 404 bug). Locally the API gateway still forwards /app1/** unstripped (see its own
+    # application.yml), so this default keeps `curl http://localhost:8080/app1/aggregate` working.
+    context-path: ${SERVER_SERVLET_CONTEXT_PATH:/app1}
 
 spring:
   application:

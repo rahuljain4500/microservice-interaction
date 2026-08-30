@@ -1,5 +1,8 @@
 server:
   port: 8082
+  servlet:
+    # Defaults to /app2 locally too -- see app1/application.yml's identical comment for why.
+    context-path: ${SERVER_SERVLET_CONTEXT_PATH:/app2}
 
 spring:
   application:

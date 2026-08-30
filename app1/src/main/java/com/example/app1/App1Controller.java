@@ -1,12 +1,14 @@
 package com.example.app1;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 
+// No class-level @RequestMapping("/app1") here -- DeployMate's ALB deployment already mounts this
+// whole app under /app1 via SERVER_SERVLET_CONTEXT_PATH (see application.yml/DeployMate's injected
+// env var). Adding the same prefix again here double-stacks it (real requests would need
+// /app1/app1/standalone to reach this controller), which is exactly the bug this fixes.
 @RestController
-@RequestMapping("/app1")
 public class App1Controller {
 
     private final RestClient app2RestClient;
