@@ -37,6 +37,9 @@ eureka:
   client:
     service-url:
       defaultZone: ${DISCOVERY_SERVER_URL:http://localhost:8761}/eureka
+    # See app1/application.yml's identical comment -- works around Azure Container Apps' internal
+    # mesh rejecting requests reused over an already-open connection.
+    eureka-connection-idle-timeout-seconds: 5
   instance:
     prefer-ip-address: false
     hostname: ${SERVICE_HOSTNAME:localhost}

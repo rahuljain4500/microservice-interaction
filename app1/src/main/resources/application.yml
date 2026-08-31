@@ -17,6 +17,14 @@ eureka:
   client:
     service-url:
       defaultZone: ${DISCOVERY_SERVER_URL:http://localhost:8761}/eureka
+    # Azure Container Apps' internal service mesh appears to reject requests sent over a pooled
+    # connection that's been held open a while (registration/the first call on a fresh connection
+    # succeeds; every later periodic registry-fetch reusing that same connection gets a 403 from
+    # discovery-server's own edge, never reaching the app -- see the demo repo's troubleshooting
+    # notes). Forcing the client to recycle idle connections quickly works around it. No effect on
+    # AWS -- this is pure client-side connection-reuse behavior, unrelated to how the request reaches
+    # discovery-server.
+    eureka-connection-idle-timeout-seconds: 5
   instance:
     prefer-ip-address: false
     hostname: ${SERVICE_HOSTNAME:localhost}
